@@ -1,17 +1,24 @@
 package main
 
 import (
+	"bytes"
+	"go/format"
+	"strings"
+
+	// "bytes"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	// "strings"
 )
 
 const (
 	exitCode      = 0
 	prefixAutoGen = "zzz-"
 	buildTag      = `+jam`
+	validationSep = `,`
 )
 
 var parseFlags = func() []string {
@@ -19,14 +26,14 @@ var parseFlags = func() []string {
 	return flag.Args()
 }
 
-func rogerMain() {
+func jamMain() {
 	packagePaths := parseFlags()
 	if len(packagePaths) == 0 {
 		return
 	}
 	path := packagePaths[0]
 
-	packageName, task := ParseDir(path)
+	packageName, task, validations := ParseDir(path)
 	log.Println(fmt.Sprintf("# %s", packageName))
 	for inFn, typesets := range task {
 		_, fn := filepath.Split(inFn)
@@ -41,9 +48,55 @@ func rogerMain() {
 		gennyGen(filepath.Join(path, inFn), packageName, typesets, out)
 	}
 
+	if len(validations) != 0{
+		var buf bytes.Buffer
+		buf.WriteString("package "+packageName)
+		buf.WriteString("\n\n// Auto-generated DO NOT EDIT!")
+		buf.WriteString("\n")
+		buf.WriteString("\n\nimport (")
+		buf.WriteString("  validation \"github.com/go-ozzo/ozzo-validation\"")
+		buf.WriteString("\n)")
+		buf.WriteString("\n")
+		for funcName, value := range validations{
+			if funcName == `ValidatePresenceOf`{
+				buf.WriteString("\n")
+				for _, value2 := range value{
+					for structName, fieldsStr := range value2{
+						fields := strings.Split(fieldsStr, validationSep)
+						buf.WriteString("\n")
+						fmt.Fprintf(&buf, "\nfunc (x %s) Validations() error {", structName)
+						fmt.Fprintf(&buf, "\nreturn validation.ValidateStruct(&x,")
+						for _, v:= range fields{
+							fmt.Fprintf(&buf, "\nvalidation.Field(&x.%s, validation.Required),", v)
+						}
+						fmt.Fprintf(&buf, "\n)")
+						fmt.Fprintf(&buf, "\n}")
+						buf.WriteString("\n")
+					}
+				}
+				buf.WriteString("\n")
+			}
+		}
+		formatted, err := format.Source(buf.Bytes())
+		if err != nil {
+			log.Printf("%s", buf.Bytes())
+		}
+
+		file := filepath.Join(path, fmt.Sprintf("%s%s", prefixAutoGen, `validate-presence-of.go`))
+		fh, err := os.Create(file)
+		if err != nil {
+			log.Printf(`failed to open file %s for writing`, file)
+		}
+		defer fh.Close()
+		fh.Write(formatted)
+
+	}
+
+
 }
 
 func main() {
-	rogerMain()
+	log.SetFlags(log.LstdFlags|log.Lshortfile)
+	jamMain()
 	os.Exit(exitCode)
 }

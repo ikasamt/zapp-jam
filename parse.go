@@ -9,9 +9,11 @@ import (
 )
 
 type Task map[string][]map[string]string
+type Validation map[string][]map[string]string
 
-func ParseDir(path string) (packageName string, task Task) {
+func ParseDir(path string) (packageName string, task Task, validation Validation) {
 	task = Task{}
+	validation = Validation{}
 
 	fset := token.NewFileSet()
 	d, err := parser.ParseDir(fset, path, nil, parser.ParseComments)
@@ -37,10 +39,15 @@ func ParseDir(path string) (packageName string, task Task) {
 						filename := tmp[1]
 						task[filename] = append(task[filename], map[string]string{`Anything`: structName})
 					default:
-						filename := tmp[1]
-						args := tmp[2:]
-						for _, arg := range args {
-							task[filename] = append(task[filename], map[string]string{`Anything`: structName, `Something`: arg})
+						if strings.Contains(tmp[1], `.go`){
+							filename := tmp[1]
+							args := tmp[2:]
+							for _, arg := range args {
+								task[filename] = append(task[filename], map[string]string{`Anything`: structName, `Something`: arg})
+							}
+						} else{
+							key := tmp[1]
+							validation[key] = append(validation[key], map[string]string{structName: tmp[2]})
 						}
 					}
 				}

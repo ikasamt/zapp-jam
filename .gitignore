@@ -12,3 +12,5 @@
 *.out
 
 zzz*
+.idea/*
+zapp-jam

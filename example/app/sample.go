@@ -2,6 +2,7 @@ package app
 
 // +jam ../clefs/is.go
 // +jam ../clefs/some.go User Item
+// +jam ValidatePresenceOf Name
 type Company struct {
 	ID   int
 	Name string
@@ -9,6 +10,7 @@ type Company struct {
 
 // +jam ../clefs/is.go
 // +jam ../clefs/diff.go
+// +jam ValidatePresenceOf Name,CompanyID
 type Item struct {
 	ID        int
 	Name      string
