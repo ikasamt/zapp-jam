@@ -49,19 +49,19 @@ func jamMain() {
 	}
 
 	if len(validations) != 0{
-		var buf bytes.Buffer
-		buf.WriteString("package "+packageName)
-		buf.WriteString("\n\n// Auto-generated DO NOT EDIT!")
-		buf.WriteString("\n")
-		buf.WriteString("\n\nimport (")
-		buf.WriteString("  validation \"github.com/go-ozzo/ozzo-validation\"")
-		buf.WriteString("\n)")
-		buf.WriteString("\n")
-		for funcName, value := range validations{
+		for funcName, validation := range validations{
 			if funcName == `ValidatePresenceOf`{
+				var buf bytes.Buffer
+				buf.WriteString("package "+packageName)
+				buf.WriteString("\n\n// Auto-generated DO NOT EDIT!")
 				buf.WriteString("\n")
-				for _, value2 := range value{
-					for structName, fieldsStr := range value2{
+				buf.WriteString("\n\nimport (")
+				buf.WriteString("  validation \"github.com/go-ozzo/ozzo-validation\"")
+				buf.WriteString("\n)")
+				buf.WriteString("\n")
+				buf.WriteString("\n")
+				for _, value := range validation{
+					for structName, fieldsStr := range value{
 						fields := strings.Split(fieldsStr, validationSep)
 						buf.WriteString("\n")
 						fmt.Fprintf(&buf, "\nfunc (x %s) Validations() error {", structName)
@@ -75,20 +75,20 @@ func jamMain() {
 					}
 				}
 				buf.WriteString("\n")
+				formatted, err := format.Source(buf.Bytes())
+				if err != nil {
+					log.Printf("%s", buf.Bytes())
+				}
+
+				file := filepath.Join(path, fmt.Sprintf("%s%s", prefixAutoGen, `validate-presence-of.go`))
+				fh, err := os.Create(file)
+				if err != nil {
+					log.Printf(`failed to open file %s for writing`, file)
+				}
+				defer fh.Close()
+				fh.Write(formatted)
 			}
 		}
-		formatted, err := format.Source(buf.Bytes())
-		if err != nil {
-			log.Printf("%s", buf.Bytes())
-		}
-
-		file := filepath.Join(path, fmt.Sprintf("%s%s", prefixAutoGen, `validate-presence-of.go`))
-		fh, err := os.Create(file)
-		if err != nil {
-			log.Printf(`failed to open file %s for writing`, file)
-		}
-		defer fh.Close()
-		fh.Write(formatted)
 
 	}
 
