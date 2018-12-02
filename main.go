@@ -48,11 +48,48 @@ func jamMain() {
 		gennyGen(filepath.Join(path, inFn), packageName, typesets, out)
 	}
 
-	if len(validations) != 0{
-		for funcName, validation := range validations{
-			if funcName == `ValidatePresenceOf`{
+	if len(validations) != 0 {
+		for funcName, validation := range validations {
+			switch funcName {
+			case `Ngram`:
 				var buf bytes.Buffer
-				buf.WriteString("package "+packageName)
+				buf.WriteString("package " + packageName)
+				buf.WriteString("\n\n// Auto-generated DO NOT EDIT!")
+				buf.WriteString("\n")
+				buf.WriteString("\n\nimport (")
+				buf.WriteString("\"github.com/ikasamt/zapp/zapp\"")
+				buf.WriteString("\n)")
+				buf.WriteString("\n")
+				buf.WriteString("\n")
+				for _, value := range validation {
+					for structName, fieldsStr := range value {
+						fields := strings.Split(fieldsStr, validationSep)
+						buf.WriteString("\n")
+						fmt.Fprintf(&buf, "\nfunc (x %s) Ngrams() []string {", structName)
+						fmt.Fprintf(&buf, "\nngrams := []string{}")
+						for _, v := range fields {
+							fmt.Fprintf(&buf, "\nngrams = append(ngrams, zapp.SplitNgramsRange(x.%s, 3)...)", v)
+						}
+						fmt.Fprintf(&buf, "\nreturn ngrams")
+						buf.WriteString("\n")
+					}
+				}
+				buf.WriteString("\n")
+				formatted, err := format.Source(buf.Bytes())
+				if err != nil {
+					log.Printf("%s", buf.Bytes())
+				}
+
+				file := filepath.Join(path, fmt.Sprintf("%s%s", prefixAutoGen, `ngram.go`))
+				fh, err := os.Create(file)
+				if err != nil {
+					log.Printf(`failed to open file %s for writing`, file)
+				}
+				defer fh.Close()
+				fh.Write(formatted)
+			case `ValidatePresenceOf`:
+				var buf bytes.Buffer
+				buf.WriteString("package " + packageName)
 				buf.WriteString("\n\n// Auto-generated DO NOT EDIT!")
 				buf.WriteString("\n")
 				buf.WriteString("\n\nimport (")
@@ -60,13 +97,13 @@ func jamMain() {
 				buf.WriteString("\n)")
 				buf.WriteString("\n")
 				buf.WriteString("\n")
-				for _, value := range validation{
-					for structName, fieldsStr := range value{
+				for _, value := range validation {
+					for structName, fieldsStr := range value {
 						fields := strings.Split(fieldsStr, validationSep)
 						buf.WriteString("\n")
 						fmt.Fprintf(&buf, "\nfunc (x %s) Validations() error {", structName)
 						fmt.Fprintf(&buf, "\nreturn validation.ValidateStruct(&x,")
-						for _, v:= range fields{
+						for _, v := range fields {
 							fmt.Fprintf(&buf, "\nvalidation.Field(&x.%s, validation.Required),", v)
 						}
 						fmt.Fprintf(&buf, "\n)")
@@ -92,11 +129,10 @@ func jamMain() {
 
 	}
 
-
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags|log.Lshortfile)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	jamMain()
 	os.Exit(exitCode)
 }
