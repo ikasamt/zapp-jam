@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"github.com/iancoleman/strcase"
 	"go/format"
 	"strings"
 
@@ -34,7 +33,7 @@ func jamMain() {
 	}
 	path := packagePaths[0]
 
-	packageName, task, tasks2 := ParseDir(path)
+	packageName, task, validations := ParseDir(path)
 	log.Println(fmt.Sprintf("# %s", packageName))
 	for inFn, typesets := range task {
 		_, fn := filepath.Split(inFn)
@@ -49,49 +48,25 @@ func jamMain() {
 		gennyGen(filepath.Join(path, inFn), packageName, typesets, out)
 	}
 
-	if len(tasks2) != 0 {
-		for funcName, validation := range tasks2 {
-			var buf bytes.Buffer
-			buf.WriteString("package " + packageName)
-			buf.WriteString("\n\n// Auto-generated DO NOT EDIT!")
-			buf.WriteString("\n")
-			baseName := ``
-			if funcName == `Setter` {
-				baseName = `setter.go`
-				buf.WriteString("\n\nimport (")
-				buf.WriteString("  \"github.com/gin-gonic/gin\"")
-				buf.WriteString("  \"github.com/ikasamt/zapp/zapp\"")
-				buf.WriteString("\n)")
+	if len(validations) != 0{
+		for funcName, validation := range validations{
+			if funcName == `ValidatePresenceOf`{
+				var buf bytes.Buffer
+				buf.WriteString("package "+packageName)
+				buf.WriteString("\n\n// Auto-generated DO NOT EDIT!")
 				buf.WriteString("\n")
-				buf.WriteString("\n")
-				for _, value := range validation {
-					for structName, fieldsStr := range value {
-						fields := strings.Split(fieldsStr, validationSep)
-						buf.WriteString("\n")
-						fmt.Fprintf(&buf, "\nfunc (x *%s) Setter(c *gin.Context) {", structName)
-						for _, fieldName := range fields {
-							// fieldType := getFieldType("./"+path, packageName, structName, fieldName)
-							snakeFieldName := strcase.ToSnake(fieldName)
-							fmt.Fprintf(&buf, "\nx.%s = zapp.GetParams(c, \"%s\"),", fieldName, snakeFieldName)
-						}
-						fmt.Fprintf(&buf, "\n}")
-						buf.WriteString("\n")
-					}
-				}
-			} else if funcName == `ValidatePresenceOf` {
-				baseName = `validate-presence-of.go`
 				buf.WriteString("\n\nimport (")
 				buf.WriteString("  validation \"github.com/go-ozzo/ozzo-validation\"")
 				buf.WriteString("\n)")
 				buf.WriteString("\n")
 				buf.WriteString("\n")
-				for _, value := range validation {
-					for structName, fieldsStr := range value {
+				for _, value := range validation{
+					for structName, fieldsStr := range value{
 						fields := strings.Split(fieldsStr, validationSep)
 						buf.WriteString("\n")
 						fmt.Fprintf(&buf, "\nfunc (x %s) Validations() error {", structName)
 						fmt.Fprintf(&buf, "\nreturn validation.ValidateStruct(&x,")
-						for _, v := range fields {
+						for _, v:= range fields{
 							fmt.Fprintf(&buf, "\nvalidation.Field(&x.%s, validation.Required),", v)
 						}
 						fmt.Fprintf(&buf, "\n)")
@@ -99,28 +74,29 @@ func jamMain() {
 						buf.WriteString("\n")
 					}
 				}
-			}
-			buf.WriteString("\n")
-			formatted, err := format.Source(buf.Bytes())
-			if err != nil {
-				log.Printf("%s", buf.Bytes())
-			}
+				buf.WriteString("\n")
+				formatted, err := format.Source(buf.Bytes())
+				if err != nil {
+					log.Printf("%s", buf.Bytes())
+				}
 
-			file := filepath.Join(path, fmt.Sprintf("%s%s", prefixAutoGen, baseName))
-			fh, err := os.Create(file)
-			if err != nil {
-				log.Printf(`failed to open file %s for writing`, file)
+				file := filepath.Join(path, fmt.Sprintf("%s%s", prefixAutoGen, `validate-presence-of.go`))
+				fh, err := os.Create(file)
+				if err != nil {
+					log.Printf(`failed to open file %s for writing`, file)
+				}
+				defer fh.Close()
+				fh.Write(formatted)
 			}
-			defer fh.Close()
-			fh.Write(formatted)
 		}
 
 	}
 
+
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.SetFlags(log.LstdFlags|log.Lshortfile)
 	jamMain()
 	os.Exit(exitCode)
 }
