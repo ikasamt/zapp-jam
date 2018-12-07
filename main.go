@@ -70,13 +70,14 @@ func jamMain() {
 						for _, v := range fields {
 							fmt.Fprintf(&buf, "\nngrams = append(ngrams, zapp.SplitNgramsRange(x.%s, 3)...)", v)
 						}
-						fmt.Fprintf(&buf, "\nreturn ngrams")
+						fmt.Fprintf(&buf, "\nreturn ngrams}")
 						buf.WriteString("\n")
 					}
 				}
 				buf.WriteString("\n")
 				formatted, err := format.Source(buf.Bytes())
 				if err != nil {
+					log.Printf("%v", err)
 					log.Printf("%s", buf.Bytes())
 				}
 
