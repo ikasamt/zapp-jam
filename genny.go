@@ -19,7 +19,7 @@ func gennyGen(filename, pkgName string, typesets []map[string]string, out io.Wri
 	}
 	defer file.Close()
 
-	output, err = parse.Generics(filename, pkgName, file, typesets)
+	output, err = parse.Generics(filename, "outputFilename.go", pkgName, file, typesets)
 	if err != nil {
 		return err
 	}
