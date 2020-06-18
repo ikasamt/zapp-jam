@@ -25,7 +25,7 @@ const (
 var GoPath string
 var ZappJamSrcRoot string
 
-const SemanticVersion = `v0.6.6`
+const SemanticVersion = `v0.6.8`
 
 func init() {
 	GoPath = os.Getenv("GOPATH")
