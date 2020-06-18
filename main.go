@@ -25,12 +25,14 @@ const (
 var GoPath string
 var ZappJamSrcRoot string
 
+const SemanticVersion = `v0.6.6`
+
 func init() {
 	GoPath = os.Getenv("GOPATH")
 	if GoPath == "" {
 		GoPath = build.Default.GOPATH
 	}
-	ZappJamSrcRoot = filepath.Join(GoPath, `/pkg/mod/github.com/ikasamt/zapp-jam`)
+	ZappJamSrcRoot = filepath.Join(GoPath, `/pkg/mod/github.com/ikasamt/zapp-jam\@`+SemanticVersion)
 	log.Println(ZappJamSrcRoot)
 }
 
