@@ -1,4 +1,4 @@
-package clefs
+package example
 
 // Anything is defined as base Struct for genny
 type Anything struct { //generic.Type

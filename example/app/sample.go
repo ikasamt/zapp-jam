@@ -1,7 +1,7 @@
 package app
 
-// +jam ../clefs/is.go
-// +jam ../clefs/some.go User Item
+// +jam /clefs/example/is.go
+// +jam /clefs/example/some.go User Item
 // +jam ValidatePresenceOf Name
 // +jam Setter Name
 type Company struct {
@@ -9,8 +9,8 @@ type Company struct {
 	Name string
 }
 
-// +jam ../clefs/is.go
-// +jam ../clefs/diff.go
+// +jam /clefs/example/is.go
+// +jam /clefs/example/diff.go
 // +jam ValidatePresenceOf Name,CompanyID
 type Item struct {
 	ID        int

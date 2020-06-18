@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"go/build"
 	"go/format"
 	"strings"
 
@@ -20,6 +21,19 @@ const (
 	buildTag      = `+jam`
 	validationSep = `,`
 )
+
+var GoPath string
+var ProjectSrcRoot string
+var ClefsRoot string
+
+func init(){
+	GoPath = os.Getenv("GOPATH")
+	if GoPath == "" {
+		GoPath = build.Default.GOPATH
+	}
+	ProjectSrcRoot = filepath.Join(GoPath, `/src/github.com/ikasamt/zapp-jam`)
+}
+
 
 var parseFlags = func() []string {
 	flag.Parse()

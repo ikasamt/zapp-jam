@@ -1,11 +1,13 @@
 package main
 
 import (
+	"go/format"
 	"io"
+	"log"
 	"os"
-)
-import 	"github.com/cheekybits/genny/parse"
 
+	"github.com/cheekybits/genny/parse"
+)
 
 func gennyGen(filename, pkgName string, typesets []map[string]string, out io.Writer) error {
 
@@ -19,11 +21,15 @@ func gennyGen(filename, pkgName string, typesets []map[string]string, out io.Wri
 	}
 	defer file.Close()
 
-	output, err = parse.Generics(filename, "outputFilename.go", pkgName, file, typesets)
+	output, err = parse.Generics(filename, pkgName, file, typesets)
 	if err != nil {
 		return err
 	}
 
-	out.Write(output)
+	fmtOutput, err := format.Source([]byte(output))
+	if err != nil {
+		log.Fatal(err)
+	}
+	out.Write(fmtOutput)
 	return nil
 }

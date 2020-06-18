@@ -5,6 +5,7 @@ import (
 	"go/parser"
 	"go/token"
 	"log"
+	"path/filepath"
 	"strings"
 )
 
@@ -37,6 +38,9 @@ func ParseDir(path string) (packageName string, task Task, validation Validation
 						continue // needs filename
 					case 2:
 						filename := tmp[1]
+						if strings.HasPrefix(filename, `/clefs/`){
+							filename = filepath.Join(ProjectSrcRoot, filename)
+						}
 						task[filename] = append(task[filename], map[string]string{`Anything`: structName})
 					default:
 						if strings.Contains(tmp[1], `.go`){

@@ -1,4 +1,4 @@
-package clefs
+package example
 
 type Something struct { //generic.Type
 	ID int //generic.Type
