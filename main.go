@@ -23,15 +23,15 @@ const (
 )
 
 var GoPath string
-var ProjectSrcRoot string
-var ClefsRoot string
+var ZappJamSrcRoot string
 
 func init() {
 	GoPath = os.Getenv("GOPATH")
 	if GoPath == "" {
 		GoPath = build.Default.GOPATH
 	}
-	ProjectSrcRoot = filepath.Join(GoPath, `/src/github.com/ikasamt/zapp-jam`)
+	ZappJamSrcRoot = filepath.Join(GoPath, `/pkg/mod/github.com/ikasamt/zapp-jam`)
+	log.Println(ZappJamSrcRoot)
 }
 
 var parseFlags = func() []string {

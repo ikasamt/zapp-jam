@@ -39,7 +39,7 @@ func ParseDir(packagePath string) (packageName string, task Task, validation Val
 					case 2:
 						filename := tmp[1]
 						if strings.HasPrefix(filename, `/clefs/`) {
-							filename = filepath.Join(ProjectSrcRoot, filename)
+							filename = filepath.Join(ZappJamSrcRoot, filename)
 						} else {
 							filename = filepath.Join(packagePath, filename)
 						}
@@ -48,7 +48,7 @@ func ParseDir(packagePath string) (packageName string, task Task, validation Val
 						if strings.Contains(tmp[1], `.go`) {
 							filename := tmp[1]
 							if strings.HasPrefix(filename, `/clefs/`) {
-								filename = filepath.Join(ProjectSrcRoot, filename)
+								filename = filepath.Join(ZappJamSrcRoot, filename)
 							} else {
 								filename = filepath.Join(packagePath, filename)
 							}
