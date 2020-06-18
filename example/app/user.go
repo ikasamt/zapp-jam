@@ -1,6 +1,6 @@
 package app
 
-// +jam ../clefs/is.go
+// +jam /clefs/example/is.go
 // +jam ValidatePresenceOf Name,CompanyID
 // +jam Ngram Name,CompanyID
 type User struct {

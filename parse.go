@@ -12,12 +12,12 @@ import (
 type Task map[string][]map[string]string
 type Validation map[string][]map[string]string
 
-func ParseDir(path string) (packageName string, task Task, validation Validation) {
+func ParseDir(packagePath string) (packageName string, task Task, validation Validation) {
 	task = Task{}
 	validation = Validation{}
 
 	fset := token.NewFileSet()
-	d, err := parser.ParseDir(fset, path, nil, parser.ParseComments)
+	d, err := parser.ParseDir(fset, packagePath, nil, parser.ParseComments)
 	if err != nil {
 		log.Println(err)
 		return
@@ -38,18 +38,25 @@ func ParseDir(path string) (packageName string, task Task, validation Validation
 						continue // needs filename
 					case 2:
 						filename := tmp[1]
-						if strings.HasPrefix(filename, `/clefs/`){
+						if strings.HasPrefix(filename, `/clefs/`) {
 							filename = filepath.Join(ProjectSrcRoot, filename)
+						} else {
+							filename = filepath.Join(packagePath, filename)
 						}
 						task[filename] = append(task[filename], map[string]string{`Anything`: structName})
 					default:
-						if strings.Contains(tmp[1], `.go`){
+						if strings.Contains(tmp[1], `.go`) {
 							filename := tmp[1]
+							if strings.HasPrefix(filename, `/clefs/`) {
+								filename = filepath.Join(ProjectSrcRoot, filename)
+							} else {
+								filename = filepath.Join(packagePath, filename)
+							}
 							args := tmp[2:]
 							for _, arg := range args {
 								task[filename] = append(task[filename], map[string]string{`Anything`: structName, `Something`: arg})
 							}
-						} else{
+						} else {
 							key := tmp[1]
 							validation[key] = append(validation[key], map[string]string{structName: tmp[2]})
 						}

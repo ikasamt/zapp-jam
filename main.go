@@ -26,14 +26,13 @@ var GoPath string
 var ProjectSrcRoot string
 var ClefsRoot string
 
-func init(){
+func init() {
 	GoPath = os.Getenv("GOPATH")
 	if GoPath == "" {
 		GoPath = build.Default.GOPATH
 	}
 	ProjectSrcRoot = filepath.Join(GoPath, `/src/github.com/ikasamt/zapp-jam`)
 }
-
 
 var parseFlags = func() []string {
 	flag.Parse()
@@ -45,13 +44,14 @@ func jamMain() {
 	if len(packagePaths) == 0 {
 		return
 	}
-	path := packagePaths[0]
+	packagePath := packagePaths[0]
 
-	packageName, task, validations := ParseDir(path)
+	packageName, task, validations := ParseDir(packagePath)
+	log.Println(task)
 	log.Println(fmt.Sprintf("# %s", packageName))
 	for inFn, typesets := range task {
 		_, fn := filepath.Split(inFn)
-		outFn := filepath.Join(path, fmt.Sprintf("%s%s", prefixAutoGen, fn))
+		outFn := filepath.Join(packagePath, fmt.Sprintf("%s%s", prefixAutoGen, fn))
 		log.Println(fmt.Sprintf("%s -> %s", inFn, outFn))
 		out, err := os.Create(outFn)
 		defer out.Close()
@@ -59,7 +59,7 @@ func jamMain() {
 			log.Println(err)
 			return
 		}
-		gennyGen(filepath.Join(path, inFn), packageName, typesets, out)
+		gennyGen(inFn, packageName, typesets, out)
 	}
 
 	if len(validations) != 0 {
@@ -95,7 +95,7 @@ func jamMain() {
 					log.Printf("%s", buf.Bytes())
 				}
 
-				file := filepath.Join(path, fmt.Sprintf("%s%s", prefixAutoGen, `ngram.go`))
+				file := filepath.Join(packagePath, fmt.Sprintf("%s%s", prefixAutoGen, `ngram.go`))
 				fh, err := os.Create(file)
 				if err != nil {
 					log.Printf(`failed to open file %s for writing`, file)
@@ -132,7 +132,7 @@ func jamMain() {
 					log.Printf("%s", buf.Bytes())
 				}
 
-				file := filepath.Join(path, fmt.Sprintf("%s%s", prefixAutoGen, `validate-presence-of.go`))
+				file := filepath.Join(packagePath, fmt.Sprintf("%s%s", prefixAutoGen, `validate-presence-of.go`))
 				fh, err := os.Create(file)
 				if err != nil {
 					log.Printf(`failed to open file %s for writing`, file)
