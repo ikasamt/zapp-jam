@@ -32,7 +32,7 @@ func init() {
 	if GoPath == "" {
 		GoPath = build.Default.GOPATH
 	}
-	ZappJamSrcRoot = filepath.Join(GoPath, `/pkg/mod/github.com/ikasamt/zapp-jam\@`+SemanticVersion)
+	ZappJamSrcRoot = filepath.Join(GoPath, `/pkg/mod/github.com/ikasamt/zapp-jam@`+SemanticVersion)
 	log.Println(ZappJamSrcRoot)
 }
 
