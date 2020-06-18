@@ -5,14 +5,14 @@ import (
 )
 
 func TestParseDir(t *testing.T) {
-	pn, task := ParseDir("./example/app")
+	pn, task, _ := ParseDir("./example/app")
 
 	if pn != `app` {
-		t.Fatal("failed test")
+		t.Fatalf("failed test %v", pn)
 	}
 
 	if task == nil {
-		t.Fatal("failed test")
+		t.Fatalf("failed test %v", task)
 	}
 
 }
